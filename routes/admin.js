@@ -2,9 +2,7 @@ const express = require('express');
 const router = express.Router();
 const tcb = require('@cloudbase/node-sdk');
 
-const app = tcb.init({
-  env: 'cloud1-6g1kbwm11a29be63'
-});
+const app = tcb.init();
 const db = app.database();
 const _ = db.command;
 
