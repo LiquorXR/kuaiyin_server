@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cloud = require('wx-server-sdk');
 const path = require('path');
+const axios = require('axios');
 
 const app = express();
 app.use(bodyParser.json());
@@ -16,6 +17,19 @@ cloud.init({
 
 const getDB = () => cloud.database();
 
+// 内部使用的简单重试包装器
+const fetchWithRetry = async (fn, retries = 3) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (i === retries - 1) throw err;
+      console.log(`[LOG] 请求失败，正在进行第 ${i + 1} 次重试...`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+};
+
 // 获取订单列表
 // 兼容不同路径的获取订单请求
 app.get(['/api/orders', '/orders'], async (req, res) => {
@@ -23,11 +37,13 @@ app.get(['/api/orders', '/orders'], async (req, res) => {
   const startTime = Date.now();
   try {
     const db = getDB();
-    // 添加 limit(20) 限制，并添加超时重试逻辑（逻辑层处理）
-    const result = await db.collection('orders')
-      .orderBy('createTime', 'desc')
-      .limit(20)
-      .get();
+    // 添加 limit(20) 限制，并添加重试逻辑
+    const result = await fetchWithRetry(() =>
+      db.collection('orders')
+        .orderBy('createTime', 'desc')
+        .limit(20)
+        .get()
+    );
     
     console.log(`[LOG] 成功获取订单，数量: ${result.data ? result.data.length : 0}，耗时: ${Date.now() - startTime}ms`);
     res.send({ code: 0, data: result.data });
