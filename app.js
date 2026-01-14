@@ -8,17 +8,13 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 初始化云 SDK (云托管内免鉴权)
-// 建议在云托管中显式指定 env 以解决 501001 超时问题
-const ENV_ID = 'cloud1-6g1kbwm11a29be63';
-
+// 修复 501001 ETIMEDOUT 的关键：云托管免鉴权环境必须使用 DYNAMIC_TYPE_CH_ENV
+// 显式 ID 有时会在 VPC 内部导致 169.254 (元数据地址) 访问超时
 cloud.init({
-  env: ENV_ID
+  env: cloud.DYNAMIC_TYPE_CH_ENV
 });
 
-// 数据库对象在请求时再获取，确保初始化完成
-const getDB = () => cloud.database({
-  env: ENV_ID
-});
+const getDB = () => cloud.database();
 
 // 获取订单列表
 // 兼容不同路径的获取订单请求
