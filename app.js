@@ -9,10 +9,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // 初始化云 SDK (云托管内免鉴权)
 cloud.init({
-  env: process.env.TCB_ENV || 'cloud1-6g1kbwm11a29be63'
+  env: cloud.DYNAMIC_TYPE_CH_ENV
 });
 
 // 数据库对象在请求时再获取，确保初始化完成
+// 使用动态环境 ID 以适应云托管免鉴权环境
 const getDB = () => cloud.database();
 
 // 获取订单列表
