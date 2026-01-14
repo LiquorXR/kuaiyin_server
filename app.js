@@ -12,19 +12,16 @@ cloud.init({
   env: process.env.TCB_ENV || 'cloud1-6g1kbwm11a29be63'
 });
 
-const db = cloud.database();
+// 数据库对象在请求时再获取，确保初始化完成
+const getDB = () => cloud.database();
 
 // 获取订单列表
-app.get('/api/orders', async (req, res) => {
+// 兼容不同路径的获取订单请求
+app.get(['/api/orders', '/orders'], async (req, res) => {
   console.log('[LOG] 开始获取订单列表...');
   const startTime = Date.now();
   try {
-    // 检查数据库连接
-    if (!db) {
-      console.error('[ERR] 数据库对象未初始化');
-      return res.status(500).send({ code: -1, msg: '数据库连接异常' });
-    }
-
+    const db = getDB();
     const result = await db.collection('orders')
       .orderBy('createTime', 'desc')
       .get();
@@ -44,11 +41,12 @@ app.get('/api/orders', async (req, res) => {
 });
 
 // 核销订单 (修改状态)
-app.post('/api/order/complete', async (req, res) => {
+app.post(['/api/order/complete', '/order/complete'], async (req, res) => {
   const { id } = req.body;
   if (!id) return res.status(400).send({ code: -1, msg: '缺少订单ID' });
 
   try {
+    const db = getDB();
     await db.collection('orders').doc(id).update({
       data: { status: 'completed' }
     });
@@ -60,7 +58,7 @@ app.post('/api/order/complete', async (req, res) => {
 });
 
 // 获取文件临时下载链接
-app.post('/api/file/url', async (req, res) => {
+app.post(['/api/file/url', '/file/url'], async (req, res) => {
   const { fileList } = req.body; // 传入 fileID 数组
   if (!fileList || !fileList.length) return res.send({ code: 0, data: [] });
 
