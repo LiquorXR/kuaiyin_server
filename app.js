@@ -9,10 +9,11 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // 初始化云 SDK (云托管内免鉴权)
-// 修复 501001 ETIMEDOUT 的关键：云托管免鉴权环境必须使用 DYNAMIC_TYPE_CH_ENV
-// 显式 ID 有时会在 VPC 内部导致 169.254 (元数据地址) 访问超时
+// 根据微信云开发文档，云托管环境推荐使用 DYNAMIC_TYPE_CH_ENV
+// 并通过环境变量或显式配置提高稳定性
 cloud.init({
-  env: cloud.DYNAMIC_TYPE_CH_ENV
+  env: 'cloud1-6g1kbwm11a29be63', // 显式指定 ID 避免动态识别超时
+  timeout: 15000 // 增加 SDK 内部超时时间至 15s
 });
 
 const getDB = () => cloud.database();
