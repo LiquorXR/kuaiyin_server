@@ -81,12 +81,50 @@ router.get('/', async (req, res) => {
   }
 
   try {
-    const { data: tasks } = await db.collection('orders')
-      .orderBy('createTime', 'desc')
-      .get();
+    // 为每个文件的 fileID 获取临时下载链接
+    for (const task of tasks) {
+      if (task.files && task.files.length > 0) {
+        const fileList = task.files.map(f => ({
+          fileID: f.fileID,
+          maxAge: 7200 // 2小时
+        }));
+        try {
+          const { fileList: urls } = await app.getTempFileURL({ fileList });
+          task.files = task.files.map((f, index) => ({
+            ...f,
+            downloadURL: urls[index].tempFileURL
+          }));
+        } catch (e) {
+          console.error(`获取文件链接失败: ${task._id}`, e);
+        }
+      }
+    }
+
+    // 获取所有相关的 _openid
+    const openids = [...new Set(tasks.map(t => t._openid).filter(id => !!id))];
+    
+    // 查询用户信息映射
+    let userMap = {};
+    if (openids.length > 0) {
+      const _ = db.command;
+      const { data: users } = await db.collection('users')
+        .where({
+          _openid: _.in(openids)
+        })
+        .get();
+      users.forEach(u => {
+        userMap[u._openid] = u.uid || '未知UID';
+      });
+    }
+
+    // 将 uid 注入到任务数据中
+    const tasksWithUid = tasks.map(t => ({
+      ...t,
+      userUid: userMap[t._openid] || '未知UID'
+    }));
     
     // orders 集合中已经包含了 files 数组，无需额外查询 task_files
-    res.render('admin/tasks', { tasks, title: '快印订单管理中心' });
+    res.render('admin/tasks', { tasks: tasksWithUid, title: '快印订单管理中心' });
   } catch (err) {
     res.status(500).render('error', { 
       message: '订单列表加载失败', 

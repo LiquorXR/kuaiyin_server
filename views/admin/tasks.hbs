@@ -10,8 +10,8 @@
             <div class="flex justify-between items-start mb-4">
                 <div>
                     <h3 class="font-bold text-lg font-mono mb-1">
-                        {{#if this._openid}}
-                        用户ID: {{this._openid}}
+                        {{#if this.userUid}}
+                        用户UID: {{this.userUid}}
                         {{else}}
                         匿名用户
                         {{/if}}
@@ -37,8 +37,8 @@
                 <h4 class="text-[10px] font-bold text-[#7F8C8D] uppercase tracking-wider">相关附件</h4>
                 {{#each this.files}}
                 <div class="flex items-center justify-between text-xs p-2 bg-white border border-[#F5F6FA] hover:border-[#7F8C8D]">
-                    <span class="truncate w-32 font-mono"><i class="far fa-file-alt mr-2"></i>{{this.name}}</span>
-                    <a href="{{this.fileID}}" target="_blank" class="text-[#44BD32] hover:underline">
+                    <span class="truncate w-32 font-mono" title="{{this.name}}"><i class="far fa-file-alt mr-2"></i>{{this.name}}</span>
+                    <a href="{{this.downloadURL}}" target="_blank" download="{{this.name}}" class="text-[#44BD32] hover:underline">
                         <i class="fas fa-download"></i>
                     </a>
                 </div>
