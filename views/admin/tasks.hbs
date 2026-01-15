@@ -1,87 +1,107 @@
-<div class="bg-white industrial-border overflow-hidden">
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-[#2F3640] text-white text-xs uppercase tracking-wider font-mono">
-                    <th class="px-4 py-3 border-b border-[#7F8C8D]">取件码</th>
-                    <th class="px-4 py-3 border-b border-[#7F8C8D]">用户UID</th>
-                    <th class="px-4 py-3 border-b border-[#7F8C8D]">下单时间</th>
-                    <th class="px-4 py-3 border-b border-[#7F8C8D]">规格</th>
-                    <th class="px-4 py-3 border-b border-[#7F8C8D]">附件</th>
-                    <th class="px-4 py-3 border-b border-[#7F8C8D]">状态</th>
-                    <th class="px-4 py-3 border-b border-[#7F8C8D]">操作</th>
-                </tr>
-            </thead>
-            <tbody class="text-sm font-mono">
-                {{#if tasks.length}}
-                    {{#each tasks}}
-                    <tr class="hover:bg-[#F5F6FA] transition-colors border-b border-[#F5F6FA]">
-                        <td class="px-4 py-4 font-bold text-[#2F3640]">{{this.pickupCode}}</td>
-                        <td class="px-4 py-4 text-[#7F8C8D]">{{#if this.userUid}}{{this.userUid}}{{else}}匿名{{/if}}</td>
-                        <td class="px-4 py-4 text-xs text-[#7F8C8D]">{{this.createTime}}</td>
-                        <td class="px-4 py-4">
-                            <div class="flex flex-col">
-                                <span class="font-bold text-xs">{{this.color}} | {{this.sides}}</span>
-                                <span class="text-[10px] text-[#7F8C8D]">x {{this.copies}} 份</span>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {{#if tasks.length}}
+        {{#each tasks}}
+        <div class="bg-white industrial-border overflow-hidden flex flex-col hover:shadow-lg transition-shadow">
+            <!-- Card Header -->
+            <div class="bg-[#2F3640] text-white p-4 flex justify-between items-center border-b border-[#7F8C8D]">
+                <div class="flex flex-col">
+                    <span class="text-[10px] uppercase tracking-widest opacity-70">取件码</span>
+                    <span class="text-xl font-bold font-mono">{{this.pickupCode}}</span>
+                </div>
+                <div class="text-right flex flex-col">
+                    <span class="text-[10px] uppercase tracking-widest opacity-70">状态</span>
+                    <span class="status-{{this.status}} font-bold text-xs uppercase">
+                        {{#if (eq this.status 'pending')}}待处理{{/if}}
+                        {{#if (eq this.status 'processing')}}打印中{{/if}}
+                        {{#if (eq this.status 'completed')}}已完成{{/if}}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-4 flex-1 space-y-4 font-mono text-sm">
+                <!-- User Info -->
+                <div class="flex justify-between border-b border-[#F5F6FA] pb-2">
+                    <span class="text-[#7F8C8D]">用户UID</span>
+                    <span class="font-bold text-[#2F3640]">{{#if this.userUid}}{{this.userUid}}{{else}}匿名{{/if}}</span>
+                </div>
+
+                <!-- Order Time -->
+                <div class="flex justify-between border-b border-[#F5F6FA] pb-2">
+                    <span class="text-[#7F8C8D]">下单时间</span>
+                    <span class="text-xs text-[#2F3640]">{{formatDate this.createTime}}</span>
+                </div>
+
+                <!-- Specs -->
+                <div class="border-b border-[#F5F6FA] pb-2">
+                    <div class="text-[#7F8C8D] mb-1">打印规格</div>
+                    <div class="flex justify-between items-end">
+                        <span class="font-bold text-[#2F3640]">{{this.color}} | {{this.sides}}</span>
+                        <span class="text-xs text-[#44BD32]">x {{this.copies}} 份</span>
+                    </div>
+                </div>
+
+                <!-- Files -->
+                <div>
+                    <div class="text-[#7F8C8D] mb-2">附件列表</div>
+                    <div class="grid grid-cols-1 gap-2">
+                        {{#each this.files}}
+                        <a href="{{this.downloadURL}}" target="_blank" download="{{this.name}}" 
+                           class="flex items-center justify-between p-2 bg-[#F5F6FA] border border-transparent hover:border-[#44BD32] transition-colors group"
+                           title="{{this.name}}">
+                            <div class="flex items-center space-x-2 truncate">
+                                <i class="fas fa-file-pdf text-[#E84118]"></i>
+                                <span class="truncate text-xs text-[#2F3640]">{{this.name}}</span>
                             </div>
-                        </td>
-                        <td class="px-4 py-4">
-                            <div class="flex flex-wrap gap-2">
-                                {{#each this.files}}
-                                <a href="{{this.downloadURL}}" target="_blank" download="{{this.name}}" 
-                                   class="inline-flex items-center px-2 py-1 bg-white border border-[#F5F6FA] text-[10px] text-[#44BD32] hover:border-[#44BD32] transition-colors"
-                                   title="{{this.name}}">
-                                    <i class="fas fa-download mr-1"></i>
-                                    <span class="truncate max-w-[80px]">{{this.name}}</span>
-                                </a>
-                                {{/each}}
-                            </div>
-                        </td>
-                        <td class="px-4 py-4">
-                            <span class="status-{{this.status}} font-bold text-[10px] uppercase">
-                                {{#if (eq this.status 'pending')}}待处理{{/if}}
-                                {{#if (eq this.status 'processing')}}打印中{{/if}}
-                                {{#if (eq this.status 'completed')}}已完成{{/if}}
-                            </span>
-                        </td>
-                        <td class="px-4 py-4">
-                            <div class="flex space-x-2">
-                                {{#unless (eq this.status 'completed')}}
-                                    {{#if (eq this.status 'pending')}}
-                                    <form action="/tasks/{{this._id}}/status" method="POST">
-                                        <input type="hidden" name="status" value="processing">
-                                        <button type="submit" class="p-2 bg-[#F1C40F] text-white hover:bg-[#D4AC0D]" title="开始打印">
-                                            <i class="fas fa-spinner"></i>
-                                        </button>
-                                    </form>
-                                    {{/if}}
-                                    <form action="/tasks/{{this._id}}/status" method="POST">
-                                        <input type="hidden" name="status" value="completed">
-                                        <button type="submit" class="p-2 bg-[#44BD32] text-white hover:bg-[#27AE60]" title="完成任务">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    </form>
-                                {{/unless}}
-                            </div>
-                        </td>
-                    </tr>
-                    {{#if this.remark}}
-                    <tr class="bg-[#F5F6FA]/50 border-b border-[#F5F6FA]">
-                        <td colspan="7" class="px-4 py-2 text-xs italic text-[#7F8C8D]">
-                            <span class="font-bold not-italic mr-2">备注:</span> "{{this.remark}}"
-                        </td>
-                    </tr>
-                    {{/if}}
-                    {{/each}}
-                {{else}}
-                    <tr>
-                        <td colspan="7" class="py-20 text-center text-[#7F8C8D] uppercase tracking-widest">
-                            <i class="fas fa-inbox text-2xl mb-2 block"></i>
-                            暂无活跃任务
-                        </td>
-                    </tr>
+                            <i class="fas fa-download text-[#44BD32] opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        </a>
+                        {{/each}}
+                    </div>
+                </div>
+
+                <!-- Remark -->
+                {{#if this.remark}}
+                <div class="bg-[#F5F6FA] p-2 border-l-4 border-[#7F8C8D]">
+                    <span class="text-[10px] text-[#7F8C8D] block uppercase font-bold">备注</span>
+                    <p class="text-xs italic text-[#2F3640]">"{{this.remark}}"</p>
+                </div>
                 {{/if}}
-            </tbody>
-        </table>
-    </div>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="p-4 bg-[#F5F6FA]/50 border-t border-[#F5F6FA]">
+                <div class="flex gap-2">
+                    {{#unless (eq this.status 'completed')}}
+                        {{#if (eq this.status 'pending')}}
+                        <form action="/tasks/{{this._id}}/status" method="POST" class="flex-1">
+                            <input type="hidden" name="status" value="processing">
+                            <button type="submit" class="w-full flex items-center justify-center space-x-2 py-2 bg-[#F1C40F] text-white hover:bg-[#D4AC0D] transition-colors">
+                                <i class="fas fa-spinner"></i>
+                                <span class="text-xs font-bold uppercase">开始打印</span>
+                            </button>
+                        </form>
+                        {{/if}}
+                        <form action="/tasks/{{this._id}}/status" method="POST" class="flex-1">
+                            <input type="hidden" name="status" value="completed">
+                            <button type="submit" class="w-full flex items-center justify-center space-x-2 py-2 bg-[#44BD32] text-white hover:bg-[#27AE60] transition-colors">
+                                <i class="fas fa-check"></i>
+                                <span class="text-xs font-bold uppercase">完成任务</span>
+                            </button>
+                        </form>
+                    {{else}}
+                        <div class="w-full py-2 text-center text-[#7F8C8D] border border-dashed border-[#7F8C8D]">
+                            <i class="fas fa-check-double mr-1"></i>
+                            已完成
+                        </div>
+                    {{/unless}}
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    {{else}}
+        <div class="col-span-full py-20 text-center text-[#7F8C8D] uppercase tracking-widest bg-white industrial-border">
+            <i class="fas fa-inbox text-4xl mb-4 block opacity-20"></i>
+            暂无活跃任务
+        </div>
+    {{/if}}
 </div>
