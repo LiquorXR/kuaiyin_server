@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const tcb = require('@cloudbase/node-sdk');
 
-// 优先从环境变量获取，没有则使用 hardcode (仅用于兜底)
-const ENV_ID = process.env.TCB_ENV || 'cloud1-6g1kbwm11a29be63';
+// 优先从环境变量获取
+const ENV_ID = process.env.TCB_ENV;
 
 let app;
 try {
@@ -48,8 +48,8 @@ router.get('/health', async (req, res) => {
 router.get('/stats', async (req, res) => {
   if (!db) return res.status(500).json({ error: 'Database not initialized' });
   try {
-    const { total } = await db.collection('print_tasks').count();
-    const { total: pending } = await db.collection('print_tasks').where({ status: 0 }).count();
+    const { total } = await db.collection('orders').count();
+    const { total: pending } = await db.collection('orders').where({ status: 'pending' }).count();
     res.json({ total, pending });
   } catch (err) {
     res.status(500).json({ error: err.message, code: err.code });
@@ -62,8 +62,8 @@ router.post('/tasks/:id/status', async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
   try {
-    await db.collection('print_tasks').doc(id).update({
-      status: parseInt(status)
+    await db.collection('orders').doc(id).update({
+      status: status
     });
     res.redirect('/');
   } catch (err) {
@@ -81,19 +81,11 @@ router.get('/', async (req, res) => {
   }
 
   try {
-    const { data: tasks } = await db.collection('print_tasks')
+    const { data: tasks } = await db.collection('orders')
       .orderBy('createTime', 'desc')
       .get();
     
-    // 获取关联文件
-    for (let task of tasks) {
-      const { data: files } = await db.collection('task_files')
-        .where({
-          printTask: task._id
-        }).get();
-      task.files = files;
-    }
-
+    // orders 集合中已经包含了 files 数组，无需额外查询 task_files
     res.render('admin/tasks', { tasks, title: '快印订单管理中心' });
   } catch (err) {
     res.status(500).render('error', { 

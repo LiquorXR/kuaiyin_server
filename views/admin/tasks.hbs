@@ -4,37 +4,41 @@
         <div class="bg-white industrial-border p-6 relative group hover:translate-y-[-4px] transition-transform">
             <!-- Order ID Badge -->
             <div class="absolute -top-3 -right-3 bg-[#2F3640] text-white text-[10px] px-2 py-1 font-mono transform rotate-3">
-                TASK NO: {{this.taskNo}}
+                取件码: {{this.pickupCode}}
             </div>
 
             <div class="flex justify-between items-start mb-4">
                 <div>
                     <h3 class="font-bold text-lg font-mono mb-1">
-                        {{#if this.userId}}
-                        USER: {{this.userId}}
+                        {{#if this._openid}}
+                        用户ID: {{this._openid}}
                         {{else}}
-                        ANONYMOUS
+                        匿名用户
                         {{/if}}
                     </h3>
                     <p class="text-xs text-[#7F8C8D] font-mono">{{this.createTime}}</p>
                 </div>
                 <span class="status-{{this.status}} font-bold text-xs">
-                    {{#if (eq this.status 0)}}<i class="fas fa-clock mr-1"></i>待处理{{/if}}
-                    {{#if (eq this.status 1)}}<i class="fas fa-spinner fa-spin mr-1"></i>打印中{{/if}}
-                    {{#if (eq this.status 2)}}<i class="fas fa-check-circle mr-1"></i>已完成{{/if}}
+                    {{#if (eq this.status 'pending')}}<i class="fas fa-clock mr-1"></i>待处理{{/if}}
+                    {{#if (eq this.status 'processing')}}<i class="fas fa-spinner fa-spin mr-1"></i>打印中{{/if}}
+                    {{#if (eq this.status 'completed')}}<i class="fas fa-check-circle mr-1"></i>已完成{{/if}}
                 </span>
             </div>
 
             <div class="mb-4 bg-[#F5F6FA] p-3 rounded text-sm italic">
+                <div class="flex justify-between mb-1">
+                    <span class="font-bold not-italic">{{this.color}} | {{this.sides}}</span>
+                    <span class="font-bold not-italic">x {{this.copies}} 份</span>
+                </div>
                 "{{#if this.remark}}{{this.remark}}{{else}}无备注{{/if}}"
             </div>
 
             <div class="space-y-2 mb-6">
-                <h4 class="text-[10px] font-bold text-[#7F8C8D] uppercase tracking-wider">Attached Files</h4>
+                <h4 class="text-[10px] font-bold text-[#7F8C8D] uppercase tracking-wider">相关附件</h4>
                 {{#each this.files}}
                 <div class="flex items-center justify-between text-xs p-2 bg-white border border-[#F5F6FA] hover:border-[#7F8C8D]">
-                    <span class="truncate w-32 font-mono"><i class="far fa-file-alt mr-2"></i>{{this.fileName}}</span>
-                    <a href="{{this.fileUrl}}" target="_blank" class="text-[#44BD32] hover:underline">
+                    <span class="truncate w-32 font-mono"><i class="far fa-file-alt mr-2"></i>{{this.name}}</span>
+                    <a href="{{this.fileID}}" target="_blank" class="text-[#44BD32] hover:underline">
                         <i class="fas fa-download"></i>
                     </a>
                 </div>
@@ -42,16 +46,16 @@
             </div>
 
             <div class="flex space-x-2">
-                <form action="/admin/tasks/{{this._id}}/status" method="POST" class="flex-1">
-                    <input type="hidden" name="status" value="1">
+                <form action="/tasks/{{this._id}}/status" method="POST" class="flex-1">
+                    <input type="hidden" name="status" value="processing">
                     <button type="submit" class="w-full bg-[#F1C40F] text-white py-2 text-xs font-bold uppercase tracking-tighter hover:bg-[#D4AC0D]">
-                        Start Print
+                        开始打印
                     </button>
                 </form>
-                <form action="/admin/tasks/{{this._id}}/status" method="POST" class="flex-1">
-                    <input type="hidden" name="status" value="2">
+                <form action="/tasks/{{this._id}}/status" method="POST" class="flex-1">
+                    <input type="hidden" name="status" value="completed">
                     <button type="submit" class="w-full bg-[#44BD32] text-white py-2 text-xs font-bold uppercase tracking-tighter hover:bg-[#27AE60]">
-                        Complete
+                        完成任务
                     </button>
                 </form>
             </div>
@@ -60,7 +64,7 @@
     {{else}}
         <div class="col-span-full py-20 text-center">
             <i class="fas fa-inbox text-4xl text-[#7F8C8D] mb-4"></i>
-            <p class="text-[#7F8C8D] font-mono uppercase tracking-widest">No Active Tasks Found</p>
+            <p class="text-[#7F8C8D] font-mono uppercase tracking-widest">暂无活跃任务</p>
         </div>
     {{/if}}
 </div>
