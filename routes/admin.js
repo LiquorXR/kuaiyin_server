@@ -30,17 +30,17 @@ const db = app ? app.database() : null;
 // 1. 健康检查
 router.get('/health', async (req, res) => {
   res.json({
-    status: 'ok',
-    time: new Date().toISOString(),
-    envId: ENV_ID,
+    状态: '正常',
+    当前时间: new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }),
+    环境ID: ENV_ID,
     // 探测环境变量
-    env_vars: {
+    环境变量: {
       TCB_ENV: process.env.TCB_ENV,
-      SECRET_ID: process.env.TENCENTCLOUD_SECRETID ? 'PRESENT' : 'MISSING',
-      SECRET_KEY: process.env.TENCENTCLOUD_SECRETKEY ? 'PRESENT' : 'MISSING'
+      SECRET_ID: process.env.TENCENTCLOUD_SECRETID ? '已配置' : '未配置',
+      SECRET_KEY: process.env.TENCENTCLOUD_SECRETKEY ? '已配置' : '未配置'
     },
-    app_initialized: !!app,
-    db_initialized: !!db
+    SDK初始化: !!app ? '成功' : '失败',
+    数据库初始化: !!db ? '成功' : '失败'
   });
 });
 

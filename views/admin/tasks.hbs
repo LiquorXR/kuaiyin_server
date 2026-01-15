@@ -1,76 +1,87 @@
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {{#if tasks.length}}
-        {{#each tasks}}
-        <div class="bg-white industrial-border p-6 relative group hover:translate-y-[-4px] transition-transform">
-            <!-- Order ID Badge -->
-            <div class="absolute -top-3 -right-3 bg-[#2F3640] text-white text-[10px] px-2 py-1 font-mono transform rotate-3">
-                取件码: {{this.pickupCode}}
-            </div>
-
-            <div class="flex justify-between items-start mb-4">
-                <div>
-                    <h3 class="font-bold text-lg font-mono mb-1">
-                        {{#if this.userUid}}
-                        用户UID: {{this.userUid}}
-                        {{else}}
-                        匿名用户
-                        {{/if}}
-                    </h3>
-                    <p class="text-xs text-[#7F8C8D] font-mono">{{this.createTime}}</p>
-                </div>
-                <span class="status-{{this.status}} font-bold text-xs">
-                    {{#if (eq this.status 'pending')}}<i class="fas fa-clock mr-1"></i>待处理{{/if}}
-                    {{#if (eq this.status 'processing')}}<i class="fas fa-spinner fa-spin mr-1"></i>打印中{{/if}}
-                    {{#if (eq this.status 'completed')}}<i class="fas fa-check-circle mr-1"></i>已完成{{/if}}
-                </span>
-            </div>
-
-            <div class="mb-4 bg-[#F5F6FA] p-3 rounded text-sm italic">
-                <div class="flex justify-between mb-1">
-                    <span class="font-bold not-italic">{{this.color}} | {{this.sides}}</span>
-                    <span class="font-bold not-italic">x {{this.copies}} 份</span>
-                </div>
-                "{{#if this.remark}}{{this.remark}}{{else}}无备注{{/if}}"
-            </div>
-
-            <div class="space-y-2 mb-6">
-                <h4 class="text-[10px] font-bold text-[#7F8C8D] uppercase tracking-wider">相关附件</h4>
-                {{#each this.files}}
-                <div class="flex items-center justify-between text-xs p-2 bg-white border border-[#F5F6FA] hover:border-[#7F8C8D]">
-                    <span class="truncate w-32 font-mono" title="{{this.name}}"><i class="far fa-file-alt mr-2"></i>{{this.name}}</span>
-                    <a href="{{this.downloadURL}}" target="_blank" download="{{this.name}}" class="text-[#44BD32] hover:underline">
-                        <i class="fas fa-download"></i>
-                    </a>
-                </div>
-                {{/each}}
-            </div>
-
-            <div class="flex space-x-2">
-                <form action="/tasks/{{this._id}}/status" method="POST" class="flex-1">
-                    <input type="hidden" name="status" value="processing">
-                    <button type="submit" class="w-full bg-[#F1C40F] text-white py-2 text-xs font-bold uppercase tracking-tighter hover:bg-[#D4AC0D]">
-                        开始打印
-                    </button>
-                </form>
-                <form action="/tasks/{{this._id}}/status" method="POST" class="flex-1">
-                    <input type="hidden" name="status" value="completed">
-                    <button type="submit" class="w-full bg-[#44BD32] text-white py-2 text-xs font-bold uppercase tracking-tighter hover:bg-[#27AE60]">
-                        完成任务
-                    </button>
-                </form>
-            </div>
-        </div>
-        {{/each}}
-    {{else}}
-        <div class="col-span-full py-20 text-center">
-            <i class="fas fa-inbox text-4xl text-[#7F8C8D] mb-4"></i>
-            <p class="text-[#7F8C8D] font-mono uppercase tracking-widest">暂无活跃任务</p>
-        </div>
-    {{/if}}
+<div class="bg-white industrial-border overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-[#2F3640] text-white text-xs uppercase tracking-wider font-mono">
+                    <th class="px-4 py-3 border-b border-[#7F8C8D]">取件码</th>
+                    <th class="px-4 py-3 border-b border-[#7F8C8D]">用户UID</th>
+                    <th class="px-4 py-3 border-b border-[#7F8C8D]">下单时间</th>
+                    <th class="px-4 py-3 border-b border-[#7F8C8D]">规格</th>
+                    <th class="px-4 py-3 border-b border-[#7F8C8D]">附件</th>
+                    <th class="px-4 py-3 border-b border-[#7F8C8D]">状态</th>
+                    <th class="px-4 py-3 border-b border-[#7F8C8D]">操作</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm font-mono">
+                {{#if tasks.length}}
+                    {{#each tasks}}
+                    <tr class="hover:bg-[#F5F6FA] transition-colors border-b border-[#F5F6FA]">
+                        <td class="px-4 py-4 font-bold text-[#2F3640]">{{this.pickupCode}}</td>
+                        <td class="px-4 py-4 text-[#7F8C8D]">{{#if this.userUid}}{{this.userUid}}{{else}}匿名{{/if}}</td>
+                        <td class="px-4 py-4 text-xs text-[#7F8C8D]">{{this.createTime}}</td>
+                        <td class="px-4 py-4">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-xs">{{this.color}} | {{this.sides}}</span>
+                                <span class="text-[10px] text-[#7F8C8D]">x {{this.copies}} 份</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-4">
+                            <div class="flex flex-wrap gap-2">
+                                {{#each this.files}}
+                                <a href="{{this.downloadURL}}" target="_blank" download="{{this.name}}" 
+                                   class="inline-flex items-center px-2 py-1 bg-white border border-[#F5F6FA] text-[10px] text-[#44BD32] hover:border-[#44BD32] transition-colors"
+                                   title="{{this.name}}">
+                                    <i class="fas fa-download mr-1"></i>
+                                    <span class="truncate max-w-[80px]">{{this.name}}</span>
+                                </a>
+                                {{/each}}
+                            </div>
+                        </td>
+                        <td class="px-4 py-4">
+                            <span class="status-{{this.status}} font-bold text-[10px] uppercase">
+                                {{#if (eq this.status 'pending')}}待处理{{/if}}
+                                {{#if (eq this.status 'processing')}}打印中{{/if}}
+                                {{#if (eq this.status 'completed')}}已完成{{/if}}
+                            </span>
+                        </td>
+                        <td class="px-4 py-4">
+                            <div class="flex space-x-2">
+                                {{#unless (eq this.status 'completed')}}
+                                    {{#if (eq this.status 'pending')}}
+                                    <form action="/tasks/{{this._id}}/status" method="POST">
+                                        <input type="hidden" name="status" value="processing">
+                                        <button type="submit" class="p-2 bg-[#F1C40F] text-white hover:bg-[#D4AC0D]" title="开始打印">
+                                            <i class="fas fa-spinner"></i>
+                                        </button>
+                                    </form>
+                                    {{/if}}
+                                    <form action="/tasks/{{this._id}}/status" method="POST">
+                                        <input type="hidden" name="status" value="completed">
+                                        <button type="submit" class="p-2 bg-[#44BD32] text-white hover:bg-[#27AE60]" title="完成任务">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                {{/unless}}
+                            </div>
+                        </td>
+                    </tr>
+                    {{#if this.remark}}
+                    <tr class="bg-[#F5F6FA]/50 border-b border-[#F5F6FA]">
+                        <td colspan="7" class="px-4 py-2 text-xs italic text-[#7F8C8D]">
+                            <span class="font-bold not-italic mr-2">备注:</span> "{{this.remark}}"
+                        </td>
+                    </tr>
+                    {{/if}}
+                    {{/each}}
+                {{else}}
+                    <tr>
+                        <td colspan="7" class="py-20 text-center text-[#7F8C8D] uppercase tracking-widest">
+                            <i class="fas fa-inbox text-2xl mb-2 block"></i>
+                            暂无活跃任务
+                        </td>
+                    </tr>
+                {{/if}}
+            </tbody>
+        </table>
+    </div>
 </div>
-
-<script>
-    // Custom Handlebars helper-like logic for status (hbs doesn't have eq by default, so we use a simple comparison)
-    // Actually, I should have registered a helper in app.js. 
-    // For simplicity, I'll update the routes/admin.js to process the labels.
-</script>
