@@ -3,14 +3,14 @@ import { db } from '@/lib/tcb';
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!db) {
     return NextResponse.json({ error: 'Database not initialized' }, { status: 500 });
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const { status } = await request.json();
 
     await db.collection('orders').doc(id).update({

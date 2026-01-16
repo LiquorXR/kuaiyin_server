@@ -21,9 +21,9 @@ COPY . .
 # 构建 Next.js 应用
 RUN npm run build
 
-# 云托管默认监听 80 端口
-ENV PORT 80
-EXPOSE 80
+# 设置端口为3000以匹配健康检查
+ENV PORT 3000
+EXPOSE 3000
 
 # 启动 Next.js 应用
 CMD ["npm", "start"]

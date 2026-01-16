@@ -5,14 +5,14 @@ import axios from 'axios';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   if (!db) {
     return new Response('Database not initialized', { status: 500 });
   }
 
   try {
-    const { id } = params;
+    const { id } = await params;
     const { data: [task] } = await db.collection('orders').doc(id).get();
     
     if (!task || !task.files || task.files.length === 0) {
