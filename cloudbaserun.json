@@ -1,0 +1,38 @@
+{
+  "version": "2.0",
+  "envId": "cloud1-6g1kbwm11a29be63",
+  "cloudrun": {
+    "services": {
+      "kuaiyinserver": {
+        "serviceName": "kuaiyinserver",
+        "serviceType": "web",
+        "buildDir": ".",
+        "dockerfile": "Dockerfile",
+        "cpu": 0.5,
+        "mem": 1,
+        "minNum": 0,
+        "maxNum": 1,
+        "policyDetails": [
+          {
+            "PolicyType": "cpu",
+            "PolicyThreshold": 60
+          }
+        ],
+        "envParams": {
+          "NODE_ENV": "production",
+          "TCB_ENV": "cloud1-6g1kbwm11a29be63"
+        },
+        "customLogs": "stdout",
+        "initialDelaySeconds": 10,
+        "healthCheck": {
+          "path": "/api/health",
+          "port": 3000,
+          "intervalSeconds": 10,
+          "timeoutSeconds": 5,
+          "failureThreshold": 3,
+          "successThreshold": 1
+        }
+      }
+    }
+  }
+}

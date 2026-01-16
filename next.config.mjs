@@ -1,13 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:3000/:path*', // 改为根路径，因为 Express app.use('/', adminRouter)
-      },
-    ];
-  },
+  // 移除不必要的重写规则，让 Next.js 直接处理 API 路由
 };
 
 export default nextConfig;
