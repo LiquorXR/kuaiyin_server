@@ -1,6 +1,7 @@
 import React from 'react';
-import { LayoutDashboard, ClipboardList, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SystemHealth } from './system-health';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -33,10 +34,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="p-4 border-t border-slate-200">
-          <button className="flex items-center gap-3 px-4 py-2 w-full text-slate-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors">
-            <LogOut size={20} />
-            <span>退出登录</span>
-          </button>
+          <SystemHealth />
         </div>
       </aside>
 

@@ -21,6 +21,8 @@ const fetcher = (url: string) => axios.get(url).then(res => res.data);
 export default function Dashboard() {
   const { data, error, isLoading, mutate } = useSWR('/api/admin/tasks', fetcher);
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const orders: Order[] = data?.tasks || [];
   
@@ -31,9 +33,17 @@ export default function Dashboard() {
   };
 
   const filteredOrders = orders.filter(o => {
-    if (filter === 'all') return true;
-    return o.status === filter;
+    const matchesFilter = filter === 'all' || o.status === filter;
+    const matchesSearch = o.pickupCode.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesSearch;
   });
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await mutate();
+    // 延迟一下确保动画可见
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
 
   const handleStatusChange = async (id: string, status: 'pending' | 'completed') => {
     try {
@@ -45,8 +55,35 @@ export default function Dashboard() {
     }
   };
 
-  const handleDownloadAll = (id: string) => {
-    window.open(`/api/admin/tasks/${id}/download-all`, '_blank');
+  const handleDownloadAll = async (id: string) => {
+    try {
+      const response = await axios.get(`/api/admin/tasks/${id}/download-all`, {
+        responseType: 'blob'
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // 从 Content-Disposition 获取文件名
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = 'download.zip';
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename=(.+)/);
+        if (fileNameMatch && fileNameMatch[1]) {
+          fileName = decodeURIComponent(fileNameMatch[1]);
+        }
+      }
+      
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download failed:', err);
+      alert('下载失败');
+    }
   };
 
   return (
@@ -82,6 +119,8 @@ export default function Dashboard() {
               <input 
                 type="text" 
                 placeholder="搜索取件码..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-64"
               />
             </div>
@@ -108,10 +147,11 @@ export default function Dashboard() {
           </div>
           
           <button 
-            onClick={() => mutate()}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50"
           >
-            <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
+            <RefreshCw size={16} className={cn(isRefreshing ? "animate-spin" : "")} />
             刷新数据
           </button>
         </div>

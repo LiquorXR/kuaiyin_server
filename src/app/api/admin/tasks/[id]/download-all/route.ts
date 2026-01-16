@@ -35,8 +35,9 @@ export async function GET(
     await Promise.all(downloadPromises);
     const content = await zip.generateAsync({ type: 'blob' });
 
-    const now = new Date();
-    const timeStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+    // 使用订单创建时间
+    const createDate = task.createTime ? new Date(task.createTime) : new Date();
+    const timeStr = `${createDate.getFullYear()}${String(createDate.getMonth() + 1).padStart(2, '0')}${String(createDate.getDate()).padStart(2, '0')}_${String(createDate.getHours()).padStart(2, '0')}${String(createDate.getMinutes()).padStart(2, '0')}`;
     const zipName = `${task.pickupCode}_${timeStr}.zip`;
 
     return new Response(content, {
